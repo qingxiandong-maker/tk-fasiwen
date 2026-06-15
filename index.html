@@ -116,6 +116,7 @@
 <div class="toast" id="toast">已复制</div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script>
 // 注册离线缓存（壳子；数据走 Firebase 实时同步）
@@ -135,6 +136,17 @@ if ("serviceWorker" in navigator) {
     appId: "1:370281261487:web:790467ee7971f96c43675a"
   };
   firebase.initializeApp(firebaseConfig);
+
+  // 匿名登录后再连数据库（安全规则要求"已登录"，用户完全无感）
+  firebase.auth().signInAnonymously().catch(function (e) {
+    var t = document.getElementById("connTxt"); if (t) t.textContent = "登录失败：" + (e.code || e.message);
+  });
+  var __started = false;
+  firebase.auth().onAuthStateChanged(function (user) {
+    if (!user || __started) return; __started = true; start();
+  });
+
+  function start() {
   var db = firebase.database();
   var listRef = db.ref("tk/list");
   var poolRef = db.ref("tk/pool");
@@ -300,6 +312,7 @@ if ("serviceWorker" in navigator) {
     };
     reader.readAsText(f, "utf-8"); e.target.value = "";
   };
+  } // start()
 })();
 </script>
 </body>
