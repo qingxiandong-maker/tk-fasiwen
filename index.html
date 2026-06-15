@@ -44,7 +44,8 @@
        display:flex; align-items:stretch; overflow:hidden; }
   li.done { opacity:.5; }
   li.done .main { text-decoration:line-through; }
-  .main { flex:1; padding:13px 14px; cursor:pointer; min-width:0; }
+  .main { flex:1; padding:13px 14px; cursor:pointer; min-width:0;
+          display:block; text-decoration:none; color:inherit; }
   .uname { font-size:15.5px; font-weight:600; color:var(--accent); word-break:break-all; }
   li.done .uname { color:var(--done); }
   .hs { font-size:13px; color:var(--sub); margin-top:4px; line-height:1.5;
@@ -144,12 +145,19 @@ if ("serviceWorker" in navigator) {
       var li = document.createElement("li");
       if (done[c.user]) li.className = "done";
 
-      var main = document.createElement("div");
+      var main = document.createElement("a");
       main.className = "main";
+      main.href = buildUrl(c);                        // 真链接：iOS 上点击直接跳，最稳
+      main.setAttribute("rel", "noopener");
       var u = document.createElement("div"); u.className = "uname"; u.textContent = "@" + c.user;
       var h = document.createElement("div"); h.className = "hs"; h.textContent = c.hs || "（无话术，跳转后自己打字）";
       main.appendChild(u); main.appendChild(h);
-      main.onclick = function () { go(c); };
+      main.onclick = function () {
+        copyText(c.hs);                               // 点击当下同步复制（在用户手势里，iOS 才认）
+        if (!done[c.user]) { done[c.user] = true; saveDone(); }
+        li.className = "done"; mk.textContent = "✓"; refreshCounts();
+        // 不拦默认行为 → 浏览器原生跳转，绝不被拦
+      };
 
       var mk = document.createElement("div");
       mk.className = "mark"; mk.textContent = done[c.user] ? "✓" : "○";
@@ -183,18 +191,19 @@ if ("serviceWorker" in navigator) {
     setTimeout(function () { t.classList.remove("show"); }, 1200);
   }
 
-  function go(c) {
-    copyText(c.hs);
-    done[c.user] = true; saveDone(); render();
-    showToast(c.hs ? "已复制话术，正在跳转…" : "正在跳转…");
-    var url;
+  function buildUrl(c) {
     if ($("useShortcut").checked) {
       var input = encodeURIComponent(c.user + "|" + (c.hs || ""));
-      url = "shortcuts://run-shortcut?name=" + encodeURIComponent("去发私信") + "&input=" + input;
-    } else {
-      url = "https://www.tiktok.com/@" + encodeURIComponent(c.user);
+      return "shortcuts://run-shortcut?name=" + encodeURIComponent("去发私信") + "&input=" + input;
     }
-    setTimeout(function () { window.location.href = url; }, 120);
+    return "https://www.tiktok.com/@" + encodeURIComponent(c.user);
+  }
+
+  function refreshCounts() {
+    var d = 0;
+    customers.forEach(function (c) { if (done[c.user]) d++; });
+    $("cntDone").textContent = d;
+    $("bar").style.width = (customers.length ? (d / customers.length * 100) : 0) + "%";
   }
 
   function generate() {
