@@ -46,6 +46,11 @@
   li.done .mark { color:var(--done); }
   .tag { font-size:11px; padding:1px 6px; border-radius:7px; margin-left:6px; font-weight:500; white-space:nowrap; }
   .tag.bad { background:#3a1414; color:#ff8a8a; } .tag.warn { background:#3a2c12; color:#ffcd80; }
+  .gtag { font-size:11px; padding:1px 7px; border-radius:8px; margin-right:6px; font-weight:700; }
+  .gtag.f { background:#3a1430; color:#ff9ad1; } .gtag.m { background:#16243a; color:#7db4ff; } .gtag.u { background:#23262f; color:#8b9099; }
+  .filters { display:flex; gap:8px; margin:0 2px 12px; }
+  .fbtn { background:var(--card); border:1px solid var(--line); color:var(--sub); border-radius:18px; padding:6px 15px; font-size:13px; cursor:pointer; }
+  .fbtn.active { background:var(--accent); color:#fff; border-color:var(--accent); }
   .empty { text-align:center; color:var(--sub); font-size:13.5px; padding:40px 10px; line-height:1.8; }
 
   details { background:var(--card); border:1px solid var(--line); border-radius:12px; margin:14px 0 0; }
@@ -81,6 +86,12 @@
      <b style="color:var(--txt)">所有手机实时共用同一份名单和进度</b>，谁发了大家都看到。</p>
 
   <div class="board" id="board" style="display:none"></div>
+
+  <div class="filters" id="filters" style="display:none">
+    <button class="fbtn active" data-g="all">全部</button>
+    <button class="fbtn" data-g="女">♀ 女</button>
+    <button class="fbtn" data-g="男">♂ 男</button>
+  </div>
 
   <ul id="list"></ul>
   <div class="empty" id="empty">还没有名单。请在电脑上开「管理模式」导入。</div>
@@ -151,11 +162,14 @@ if ("serviceWorker" in navigator) {
   var listRef = db.ref("tk/list");
   var poolRef = db.ref("tk/pool");
   var sentRef = db.ref("tk/sent");
+  var genderRef = db.ref("tk/gender");
+  var filterG = "all";
 
   var $ = function (id) { return document.getElementById(id); };
   var LS_ADMIN = "tk_admin", LS_SC = "tk_use_sc";
 
-  var state = { listText: "", poolText: "", sent: {} };
+  var state = { listText: "", poolText: "", sent: {}, gender: {} };
+  function genderOf(u) { return state.gender[skey(u)] || "?"; }
   var customers = [];
 
   // 用户名 → Firebase 安全 key（避开 . $ # [ ] / %）
@@ -195,14 +209,16 @@ if ("serviceWorker" in navigator) {
     customers = parseList();
     var ul = $("list"); ul.innerHTML = "";
 
-    var withHs = 0, numericN = 0, seen = {}, dupSet = {}, doneN = 0;
+    var withHs = 0, numericN = 0, seen = {}, dupSet = {}, doneN = 0, femN = 0, maleN = 0;
     customers.forEach(function (c) {
       if (c.hs) withHs++;
       if (/^\d+$/.test(c.user)) numericN++;
       var k = c.user.toLowerCase(); if (seen[k]) dupSet[k] = 1; seen[k] = 1;
       if (isSent(c.user)) doneN++;
+      var g = genderOf(c.user); if (g === "女") femN++; else if (g === "男") maleN++;
     });
 
+    var hasGender = femN + maleN > 0;
     var b = $("board");
     if (customers.length) {
       function chip(n, l, cls) { return '<div class="bchip ' + (cls || "") + '"><b>' + n + '</b><span>' + l + '</span></div>'; }
@@ -211,11 +227,15 @@ if ("serviceWorker" in navigator) {
         chip(customers.length, "客户总数", "ok") +
         chip(doneN, "已发", "") +
         chip(customers.length - doneN, "剩余", "left") +
+        (hasGender ? chip(femN, "♀ 女", "") + chip(maleN, "♂ 男", "") : "") +
         chip(numericN, "⚠️数字ID·跳不了", numericN ? "bad" : "") +
         chip(Object.keys(dupSet).length, "⚠️重复", Object.keys(dupSet).length ? "warn" : "");
     } else { b.style.display = "none"; b.innerHTML = ""; }
+    $("filters").style.display = (customers.length && hasGender) ? "" : "none";
 
     customers.forEach(function (c) {
+      var g = genderOf(c.user);
+      if (filterG !== "all" && g !== filterG) return;   // 筛选：只画选中性别
       var sent = isSent(c.user);
       var isNum = /^\d+$/.test(c.user);
       var isDup = !!dupSet[c.user.toLowerCase()] && !isNum;
@@ -225,6 +245,12 @@ if ("serviceWorker" in navigator) {
       var main = document.createElement("a");
       main.className = "main"; main.href = buildUrl(c); main.setAttribute("rel", "noopener");
       var u = document.createElement("div"); u.className = "uname";
+      if (g === "女" || g === "男") {
+        var gt = document.createElement("span");
+        gt.className = "gtag " + (g === "女" ? "f" : "m");
+        gt.textContent = (g === "女" ? "♀" : "♂");
+        u.appendChild(gt);
+      }
       u.appendChild(document.createTextNode("@" + c.user));
       if (isNum) { var tn = document.createElement("span"); tn.className = "tag bad"; tn.textContent = "数字ID跳不了"; u.appendChild(tn); }
       else if (isDup) { var tdp = document.createElement("span"); tdp.className = "tag warn"; tdp.textContent = "重复"; u.appendChild(tdp); }
@@ -264,6 +290,7 @@ if ("serviceWorker" in navigator) {
   listRef.on("value", function (s) { state.listText = s.val() || ""; if ($("adminBox").style.display !== "none") $("listInput").value = state.listText; render(); });
   poolRef.on("value", function (s) { state.poolText = s.val() || ""; if ($("adminBox").style.display !== "none") $("poolInput").value = state.poolText; render(); });
   sentRef.on("value", function (s) { state.sent = s.val() || {}; render(); });
+  genderRef.on("value", function (s) { state.gender = s.val() || {}; render(); });
   db.ref(".info/connected").on("value", function (s) {
     var on = s.val() === true;
     $("dot").className = "dot " + (on ? "on" : "off");
@@ -273,6 +300,15 @@ if ("serviceWorker" in navigator) {
   // ── 管理模式 ──
   $("useShortcut").checked = localStorage.getItem(LS_SC) === "1";
   $("useShortcut").onchange = function () { localStorage.setItem(LS_SC, this.checked ? "1" : "0"); render(); };
+
+  // 性别筛选按钮
+  Array.prototype.forEach.call(document.querySelectorAll(".fbtn"), function (btn) {
+    btn.onclick = function () {
+      filterG = btn.getAttribute("data-g");
+      Array.prototype.forEach.call(document.querySelectorAll(".fbtn"), function (x) { x.classList.toggle("active", x === btn); });
+      render();
+    };
+  });
 
   function applyAdmin(on) {
     $("adminBox").style.display = on ? "" : "none";
