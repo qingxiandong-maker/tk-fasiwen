@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>TK发私信</title>
-<!-- 加到主屏幕后：全屏、无地址栏、像 App -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -13,21 +12,43 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAABcElEQVR42u3aMQ0AMAhFQXxhBf822h2YmO/nKWhuIo2XJa2FJxAcgkNwCA7BITgEh+AQHIJDgkNwCA7BITgEh+AQHIJDcEhwCA7BITgEh+AQHIJDcAgOCQ7BITgEh+AQHIJDcAgOwSE4JDgEh+AQHIJDcAgOwSE4BIcEh+AQHIJDcAgOwSE4BMcxa4MDDjjggAMOOOCAAw444IADDjjggAMOOOCAAw444IADDjjggAMOOOCQ4BAcgkNwCA7BITgEh+BwIXUhhQMOOOCAAw444IADDjgMDjjggAMOOOCAAw444IADDjjggAMOOODw2UdwCA7BITgEh+CQ4BAcgkNwCA7BITgEh+AQHBIcgkNwCA7BITgEh+AQHIJDgkNwCA7BITgEh+AQHIJDcAgOCQ7BITgEh+AQHIJDcAgOwSHBITgEh+AQHIJDcAgOwSE4JDgEh+AQHIJDcAgOwSE4BIfgkGYfyyW4qdVxlAoAAAAASUVORK5CYII=">
 <style>
-  :root { --bg:#0f1115; --card:#1a1d24; --line:#2a2e38; --txt:#e8eaed; --sub:#9aa0ab;
-          --accent:#ff3b5c; --done:#2e7d32; --donebg:#16240f; }
+  :root { --bg:#0f1115; --card:#1a1d24; --line:#2a2e38; --txt:#e8eaed; --sub:#9aa0ab; --accent:#ff3b5c; --done:#2e7d32; }
   * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   html,body { margin:0; padding:0; background:var(--bg); color:var(--txt);
-              font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Helvetica Neue",sans-serif; }
+              font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; }
   .wrap { max-width:680px; margin:0 auto;
-          padding:calc(14px + env(safe-area-inset-top)) 12px calc(80px + env(safe-area-inset-bottom)); }
-  h1 { font-size:18px; margin:6px 2px 2px; }
-  .hint { font-size:12.5px; color:var(--sub); margin:0 2px 12px; line-height:1.6; }
-  .bar { display:flex; align-items:center; gap:10px; margin:8px 2px 14px; font-size:13px; color:var(--sub); }
-  .bar b { color:var(--txt); font-size:15px; }
-  .progress { flex:1; height:6px; background:var(--line); border-radius:3px; overflow:hidden; }
-  .progress > i { display:block; height:100%; background:var(--accent); width:0%; transition:width .25s; }
+          padding:calc(12px + env(safe-area-inset-top)) 12px calc(80px + env(safe-area-inset-bottom)); }
+  .top { display:flex; align-items:center; justify-content:space-between; margin:4px 2px 2px; }
+  h1 { font-size:18px; margin:0; }
+  .conn { font-size:12px; color:var(--sub); display:flex; align-items:center; gap:5px; }
+  .dot { width:8px; height:8px; border-radius:50%; background:#666; }
+  .dot.on { background:#39d353; } .dot.off { background:#ff5c5c; }
+  .hint { font-size:12.5px; color:var(--sub); margin:6px 2px 12px; line-height:1.6; }
 
-  details { background:var(--card); border:1px solid var(--line); border-radius:12px; margin:0 0 14px; }
+  .board { display:flex; flex-wrap:wrap; gap:8px; margin:0 2px 14px; }
+  .bchip { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:7px 12px; min-width:60px; }
+  .bchip b { display:block; font-size:21px; line-height:1.15; font-variant-numeric:tabular-nums; }
+  .bchip span { font-size:11px; color:var(--sub); }
+  .bchip.ok b { color:var(--accent); } .bchip.left b{color:#5ad17a;} .bchip.bad b { color:#ff5c5c; } .bchip.warn b { color:#ffb74d; }
+
+  ul { list-style:none; margin:0; padding:0; }
+  li { background:var(--card); border:1px solid var(--line); border-radius:12px; margin:0 0 10px;
+       display:flex; align-items:stretch; overflow:hidden; }
+  li.done { opacity:.5; }
+  li.done .main { text-decoration:line-through; }
+  .main { flex:1; padding:13px 14px; cursor:pointer; min-width:0; display:block; text-decoration:none; color:inherit; }
+  .uname { font-size:15.5px; font-weight:600; color:var(--accent); word-break:break-all; }
+  li.done .uname { color:var(--done); }
+  .hs { font-size:13px; color:var(--sub); margin-top:4px; line-height:1.5;
+        display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .mark { width:54px; flex:none; border-left:1px solid var(--line); background:transparent;
+          color:var(--sub); font-size:22px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+  li.done .mark { color:var(--done); }
+  .tag { font-size:11px; padding:1px 6px; border-radius:7px; margin-left:6px; font-weight:500; white-space:nowrap; }
+  .tag.bad { background:#3a1414; color:#ff8a8a; } .tag.warn { background:#3a2c12; color:#ffcd80; }
+  .empty { text-align:center; color:var(--sub); font-size:13.5px; padding:40px 10px; line-height:1.8; }
+
+  details { background:var(--card); border:1px solid var(--line); border-radius:12px; margin:14px 0 0; }
   summary { padding:12px 14px; font-size:14px; cursor:pointer; color:var(--txt); user-select:none; }
   .panel { padding:0 14px 14px; }
   label.fld { display:block; font-size:12.5px; color:var(--sub); margin:10px 0 5px; }
@@ -37,121 +58,108 @@
   .btn { display:inline-block; background:var(--accent); color:#fff; border:none; border-radius:10px;
          padding:11px 16px; font-size:15px; font-weight:600; cursor:pointer; }
   .btn.ghost { background:transparent; color:var(--sub); border:1px solid var(--line); font-weight:500; }
+  .btn.danger { background:transparent; color:#ff8a8a; border:1px solid #5a2a2a; font-weight:500; }
   .row-btns { display:flex; gap:10px; margin-top:12px; flex-wrap:wrap; }
-
-  ul { list-style:none; margin:0; padding:0; }
-  li { background:var(--card); border:1px solid var(--line); border-radius:12px; margin:0 0 10px;
-       display:flex; align-items:stretch; overflow:hidden; }
-  li.done { opacity:.5; }
-  li.done .main { text-decoration:line-through; }
-  .main { flex:1; padding:13px 14px; cursor:pointer; min-width:0;
-          display:block; text-decoration:none; color:inherit; }
-  .uname { font-size:15.5px; font-weight:600; color:var(--accent); word-break:break-all; }
-  li.done .uname { color:var(--done); }
-  .hs { font-size:13px; color:var(--sub); margin-top:4px; line-height:1.5;
-        display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
-  .mark { width:54px; flex:none; border-left:1px solid var(--line); background:transparent;
-          color:var(--sub); font-size:22px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
-  li.done .mark { color:var(--done); }
-  .empty { text-align:center; color:var(--sub); font-size:13.5px; padding:40px 10px; line-height:1.8; }
-  .toast { position:fixed; left:50%; bottom:24px; transform:translateX(-50%) translateY(20px);
-           background:#000; color:#fff; padding:10px 18px; border-radius:22px; font-size:14px;
-           opacity:0; transition:.2s; pointer-events:none; z-index:9; }
-  .toast.show { opacity:.92; transform:translateX(-50%) translateY(0); }
+  .adminbar { margin-top:16px; display:flex; align-items:center; gap:8px; font-size:13px; color:var(--sub); }
+  .adminbar input { width:18px; height:18px; }
   .opt { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--sub); margin-top:12px; }
   .opt input { width:18px; height:18px; }
 
-  /* 导入看板 */
-  .board { display:flex; flex-wrap:wrap; gap:8px; margin:0 2px 14px; }
-  .bchip { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:7px 12px; min-width:62px; }
-  .bchip b { display:block; font-size:20px; line-height:1.15; font-variant-numeric:tabular-nums; }
-  .bchip span { font-size:11px; color:var(--sub); }
-  .bchip.ok b { color:var(--accent); } .bchip.bad b { color:#ff5c5c; } .bchip.warn b { color:#ffb74d; }
-  .tag { font-size:11px; padding:1px 6px; border-radius:7px; margin-left:6px; font-weight:500; white-space:nowrap; }
-  .tag.bad { background:#3a1414; color:#ff8a8a; } .tag.warn { background:#3a2c12; color:#ffcd80; }
+  .toast { position:fixed; left:50%; bottom:24px; transform:translateX(-50%) translateY(20px);
+           background:#000; color:#fff; padding:10px 18px; border-radius:22px; font-size:14px;
+           opacity:0; transition:.2s; pointer-events:none; z-index:9; max-width:88%; text-align:center; }
+  .toast.show { opacity:.92; transform:translateX(-50%) translateY(0); }
 </style>
 </head>
 <body>
 <div class="wrap">
-  <h1>📨 TK 发私信名单</h1>
-  <p class="hint">点客户那一行 → <b style="color:var(--txt)">话术自动复制</b> + 跳到他的 TikTok 主页。<br>
-     进 TikTok 后点「发消息」→ 长按粘贴 → 发送。回来点下一个。已发的会划掉，关掉再开也记得。</p>
-
-  <div class="bar">
-    <span>已发 <b id="cntDone">0</b> / 共 <b id="cntAll">0</b></span>
-    <span class="progress"><i id="bar"></i></span>
+  <div class="top">
+    <h1>📨 TK 发私信</h1>
+    <span class="conn"><span class="dot" id="dot"></span><span id="connTxt">连接中…</span></span>
   </div>
+  <p class="hint">点客户那行 → 话术自动复制 + 跳到他 TikTok 主页。进去点「发消息」长按粘贴发送。<br>
+     <b style="color:var(--txt)">所有手机实时共用同一份名单和进度</b>，谁发了大家都看到。</p>
 
-  <!-- 导入看板：导入/拉取/生成后显示这批名单的构成 -->
   <div class="board" id="board" style="display:none"></div>
 
-  <details id="editBox">
-    <summary>✏️ 编辑名单 / 设置话术</summary>
+  <ul id="list"></ul>
+  <div class="empty" id="empty">还没有名单。请在电脑上开「管理模式」导入。</div>
+
+  <!-- 管理模式：导入/清空（在电脑上勾开） -->
+  <div class="adminbar">
+    <input type="checkbox" id="adminToggle">
+    <label for="adminToggle" style="margin:0">⚙️ 管理模式（导入 / 清空名单，在电脑上开。手机不用开）</label>
+  </div>
+
+  <details id="adminBox" style="display:none">
+    <summary>✏️ 编辑 / 导入名单</summary>
     <div class="panel">
-      <label class="fld">客户名单（一行一个；格式：<b>用户名 | 话术</b>。不写话术就用下面的通用话术）</label>
-      <textarea id="listInput" placeholder="zhang_san | 你好呀，刷到你视频觉得很投缘，想认识一下😊&#10;li_si&#10;wang_wu | 在吗？看你也是台湾的，想交个朋友"></textarea>
-
-      <label class="fld">通用话术（可写多句，每行一句，会轮换着配给没单独写话术的客户）</label>
-      <textarea id="hsInput" style="min-height:80px" placeholder="你好呀，刷到你的视频，想认识一下交个朋友😊&#10;嗨，看到你的主页觉得很有缘，打个招呼~"></textarea>
-
+      <label class="fld">客户名单（一行一个：<b>用户名 | 话术</b> / <b>用户名,话术</b> / 纯用户名）</label>
+      <textarea id="listInput" placeholder="zhang_san | 你好呀，刷到你视频想认识一下😊&#10;li_si&#10;wang_meimei,在吗？交个朋友吧"></textarea>
+      <label class="fld">通用话术（每行一句，给没写话术的客户轮换用）</label>
+      <textarea id="poolInput" style="min-height:70px" placeholder="你好呀，刷到你的视频，想认识一下😊"></textarea>
       <div class="opt">
         <input type="checkbox" id="useShortcut">
-        <label for="useShortcut" style="margin:0">用「去发私信」快捷指令跳转（装了快捷指令再勾；不勾就直接跳，话术也照样复制）</label>
+        <label for="useShortcut" style="margin:0">用「去发私信」快捷指令跳转（装了再勾）</label>
       </div>
-
-      <label class="fld">电脑同步码（电脑推送名单后填一次，以后点「拉取」就把电脑上的名单拉下来）</label>
-      <div style="display:flex; gap:8px">
-        <input id="syncCode" placeholder="把电脑给的同步码粘进来" autocomplete="off" spellcheck="false"
-               style="flex:1; min-width:0; background:#0c0e12; color:var(--txt); border:1px solid var(--line);
-                      border-radius:10px; padding:10px; font-size:13px; font-family:ui-monospace,Menlo,Consolas,monospace">
-        <button class="btn" id="pullBtn" style="white-space:nowrap">📥 拉取电脑名单</button>
-      </div>
-
       <div class="row-btns">
-        <button class="btn" id="genBtn">保存并生成名单</button>
+        <button class="btn" id="saveBtn">💾 保存并同步到所有手机</button>
         <label class="btn ghost" for="fileInput" style="cursor:pointer">📂 导入文件</label>
         <input type="file" id="fileInput" accept=".txt,.csv,text/plain,text/csv" style="display:none">
-        <button class="btn ghost" id="resetDone">把"已发"全部清零</button>
-        <button class="btn ghost" id="clearList" style="border-color:#5a2a2a;color:#ff8a8a">🗑️ 清空名单</button>
+        <button class="btn ghost" id="resetSent">把"已发"清零</button>
+        <button class="btn danger" id="clearAll">🗑️ 清空全部</button>
       </div>
-      <p class="hint" style="margin:8px 2px 0">导入支持 .txt / .csv：每行 <b>用户名 | 话术</b>（或 <b>用户名,话术</b> / 纯用户名）。导入会<b>追加</b>到现有名单后面。</p>
     </div>
   </details>
-
-  <ul id="list"></ul>
-  <div class="empty" id="empty">名单是空的。点上面「✏️ 编辑名单」把客户填进去。</div>
 </div>
 
-<div class="toast" id="toast">已复制话术</div>
+<div class="toast" id="toast">已复制</div>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script>
-// 注册离线缓存：第一次联网开过之后，没网也能打开
+// 注册离线缓存（壳子；数据走 Firebase 实时同步）
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load", function () {
-    navigator.serviceWorker.register("sw.js").catch(function () {});
-  });
+  window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () {}); });
 }
 </script>
-
 <script>
 (function () {
-  var LS_LIST = "tk_list_raw", LS_HS = "tk_hs_raw", LS_DONE = "tk_done", LS_SC = "tk_use_sc", LS_CODE = "tk_sync_code";
-  var $ = function (id) { return document.getElementById(id); };
-  var customers = [];          // {user, hs}
-  var done = {};               // user -> true
+  var firebaseConfig = {
+    apiKey: "AIzaSyCjZtY6mBbOpl7vTVEUhk66B1JYsTmxGmM",
+    authDomain: "tiktok----sx.firebaseapp.com",
+    databaseURL: "https://tiktok----sx-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "tiktok----sx",
+    storageBucket: "tiktok----sx.firebasestorage.app",
+    messagingSenderId: "370281261487",
+    appId: "1:370281261487:web:790467ee7971f96c43675a"
+  };
+  firebase.initializeApp(firebaseConfig);
+  var db = firebase.database();
+  var listRef = db.ref("tk/list");
+  var poolRef = db.ref("tk/pool");
+  var sentRef = db.ref("tk/sent");
 
-  function loadDone() { try { done = JSON.parse(localStorage.getItem(LS_DONE) || "{}"); } catch (e) { done = {}; } }
-  function saveDone() { localStorage.setItem(LS_DONE, JSON.stringify(done)); }
+  var $ = function (id) { return document.getElementById(id); };
+  var LS_ADMIN = "tk_admin", LS_SC = "tk_use_sc";
+
+  var state = { listText: "", poolText: "", sent: {} };
+  var customers = [];
+
+  // 用户名 → Firebase 安全 key（避开 . $ # [ ] / %）
+  function skey(u) {
+    return u.replace(/[.$#\[\]\/%]/g, function (c) { return "%" + c.charCodeAt(0).toString(16); });
+  }
 
   function parseList() {
-    var raw = $("listInput").value || "";
-    var pool = ($("hsInput").value || "").split(/\r?\n/).map(function (s) { return s.trim(); }).filter(Boolean);
+    var pool = (state.poolText || "").split(/\r?\n/).map(function (s) { return s.trim(); }).filter(Boolean);
     var out = [], pi = 0;
-    raw.split(/\r?\n/).forEach(function (line) {
+    (state.listText || "").split(/\r?\n/).forEach(function (line) {
       line = line.trim();
-      if (!line) return;
-      if (line.charAt(0) === "#") return;             // 跳过注释行
-      var parts = line.split(/\s*[|｜]\s*/);          // 按 | 或 ｜ 拆
+      if (!line || line.charAt(0) === "#") return;
+      var parts;
+      if (line.indexOf("|") >= 0 || line.indexOf("｜") >= 0) parts = line.split(/\s*[|｜]\s*/);
+      else { var m = line.match(/^([^\t,，]+)[\t,，](.+)$/); parts = m ? [m[1], m[2]] : [line]; }
       var user = (parts[0] || "").replace(/^@+/, "").trim();
       if (!user) return;
       var hs = parts.length > 1 ? parts.slice(1).join(" | ").trim() : "";
@@ -161,75 +169,71 @@ if ("serviceWorker" in navigator) {
     return out;
   }
 
-  function renderBoard(stats) {
-    var b = $("board");
-    if (!customers.length) { b.style.display = "none"; b.innerHTML = ""; return; }
-    function chip(n, label, cls) {
-      return '<div class="bchip ' + (cls || "") + '"><b>' + n + '</b><span>' + label + '</span></div>';
+  function buildUrl(c) {
+    if ($("useShortcut").checked) {
+      return "shortcuts://run-shortcut?name=" + encodeURIComponent("去发私信") +
+             "&input=" + encodeURIComponent(c.user + "|" + (c.hs || ""));
     }
-    b.style.display = "";
-    b.innerHTML =
-      chip(customers.length, "客户总数", "ok") +
-      chip(stats.withHs, "有专属话术", "") +
-      chip(stats.withoutHs, "走通用话术", "") +
-      chip(stats.numeric, "⚠️数字ID·跳不了", stats.numeric ? "bad" : "") +
-      chip(stats.dups, "⚠️重复用户名", stats.dups ? "warn" : "");
+    return "https://www.tiktok.com/@" + encodeURIComponent(c.user);
   }
 
-  function render() {
-    var ul = $("list"); ul.innerHTML = "";
-    $("cntAll").textContent = customers.length;
+  function isSent(u) { return !!state.sent[skey(u)]; }
 
-    // 第一遍：算看板统计 + 找重复用户名
-    var withHs = 0, numericN = 0, seen = {}, dupSet = {};
+  function render() {
+    customers = parseList();
+    var ul = $("list"); ul.innerHTML = "";
+
+    var withHs = 0, numericN = 0, seen = {}, dupSet = {}, doneN = 0;
     customers.forEach(function (c) {
       if (c.hs) withHs++;
       if (/^\d+$/.test(c.user)) numericN++;
-      var k = c.user.toLowerCase();
-      if (seen[k]) dupSet[k] = 1;
-      seen[k] = 1;
-    });
-    renderBoard({
-      withHs: withHs, withoutHs: customers.length - withHs,
-      numeric: numericN, dups: Object.keys(dupSet).length
+      var k = c.user.toLowerCase(); if (seen[k]) dupSet[k] = 1; seen[k] = 1;
+      if (isSent(c.user)) doneN++;
     });
 
-    // 第二遍：画列表，问题行打标
-    var d = 0;
+    var b = $("board");
+    if (customers.length) {
+      function chip(n, l, cls) { return '<div class="bchip ' + (cls || "") + '"><b>' + n + '</b><span>' + l + '</span></div>'; }
+      b.style.display = "";
+      b.innerHTML =
+        chip(customers.length, "客户总数", "ok") +
+        chip(doneN, "已发", "") +
+        chip(customers.length - doneN, "剩余", "left") +
+        chip(numericN, "⚠️数字ID·跳不了", numericN ? "bad" : "") +
+        chip(Object.keys(dupSet).length, "⚠️重复", Object.keys(dupSet).length ? "warn" : "");
+    } else { b.style.display = "none"; b.innerHTML = ""; }
+
     customers.forEach(function (c) {
-      if (done[c.user]) d++;
+      var sent = isSent(c.user);
       var isNum = /^\d+$/.test(c.user);
       var isDup = !!dupSet[c.user.toLowerCase()] && !isNum;
       var li = document.createElement("li");
-      if (done[c.user]) li.className = "done";
+      if (sent) li.className = "done";
 
       var main = document.createElement("a");
-      main.className = "main";
-      main.href = buildUrl(c);                        // 真链接：iOS 上点击直接跳，最稳
-      main.setAttribute("rel", "noopener");
+      main.className = "main"; main.href = buildUrl(c); main.setAttribute("rel", "noopener");
       var u = document.createElement("div"); u.className = "uname";
       u.appendChild(document.createTextNode("@" + c.user));
       if (isNum) { var tn = document.createElement("span"); tn.className = "tag bad"; tn.textContent = "数字ID跳不了"; u.appendChild(tn); }
-      else if (isDup) { var td = document.createElement("span"); td.className = "tag warn"; td.textContent = "重复"; u.appendChild(td); }
+      else if (isDup) { var tdp = document.createElement("span"); tdp.className = "tag warn"; tdp.textContent = "重复"; u.appendChild(tdp); }
       var h = document.createElement("div"); h.className = "hs"; h.textContent = c.hs || "（无话术，跳转后自己打字）";
       main.appendChild(u); main.appendChild(h);
       main.onclick = function () {
-        copyText(c.hs);                               // 点击当下同步复制（在用户手势里，iOS 才认）
-        if (!done[c.user]) { done[c.user] = true; saveDone(); }
-        li.className = "done"; mk.textContent = "✓"; refreshCounts();
-        // 不拦默认行为 → 浏览器原生跳转，绝不被拦
+        copyText(c.hs);
+        sentRef.child(skey(c.user)).set(true);   // 共享：标记已发，所有手机同步
+        // 不拦默认 → 原生跳转
       };
 
       var mk = document.createElement("div");
-      mk.className = "mark"; mk.textContent = done[c.user] ? "✓" : "○";
-      mk.title = "标记已发/未发";
-      mk.onclick = function (e) { e.stopPropagation(); done[c.user] = !done[c.user]; saveDone(); render(); };
-
+      mk.className = "mark"; mk.textContent = sent ? "✓" : "○"; mk.title = "标记已发/未发";
+      mk.onclick = function (e) {
+        e.stopPropagation();
+        if (sent) sentRef.child(skey(c.user)).remove();
+        else sentRef.child(skey(c.user)).set(true);
+      };
       li.appendChild(main); li.appendChild(mk);
       ul.appendChild(li);
     });
-    $("cntDone").textContent = d;
-    $("bar").style.width = (customers.length ? (d / customers.length * 100) : 0) + "%";
     $("empty").style.display = customers.length ? "none" : "block";
   }
 
@@ -238,115 +242,63 @@ if ("serviceWorker" in navigator) {
     try {
       var ta = document.createElement("textarea");
       ta.value = t; ta.style.position = "fixed"; ta.style.top = "-1000px";
-      document.body.appendChild(ta); ta.focus(); ta.select();
-      ta.setSelectionRange(0, t.length);
-      document.execCommand("copy");                 // 同步复制，紧接着跳转也来得及
-      document.body.removeChild(ta);
-    } catch (e) {
-      if (navigator.clipboard) { navigator.clipboard.writeText(t); }
-    }
+      document.body.appendChild(ta); ta.focus(); ta.select(); ta.setSelectionRange(0, t.length);
+      document.execCommand("copy"); document.body.removeChild(ta);
+    } catch (e) { if (navigator.clipboard) navigator.clipboard.writeText(t); }
   }
+  function showToast(m) { var t = $("toast"); t.textContent = m; t.classList.add("show"); setTimeout(function(){ t.classList.remove("show"); }, 1300); }
 
-  function showToast(msg) {
-    var t = $("toast"); t.textContent = msg; t.classList.add("show");
-    setTimeout(function () { t.classList.remove("show"); }, 1200);
-  }
+  // ── 实时监听（所有手机共享）──
+  listRef.on("value", function (s) { state.listText = s.val() || ""; if ($("adminBox").style.display !== "none") $("listInput").value = state.listText; render(); });
+  poolRef.on("value", function (s) { state.poolText = s.val() || ""; if ($("adminBox").style.display !== "none") $("poolInput").value = state.poolText; render(); });
+  sentRef.on("value", function (s) { state.sent = s.val() || {}; render(); });
+  db.ref(".info/connected").on("value", function (s) {
+    var on = s.val() === true;
+    $("dot").className = "dot " + (on ? "on" : "off");
+    $("connTxt").textContent = on ? "实时同步中" : "离线（连接中…）";
+  });
 
-  function buildUrl(c) {
-    if ($("useShortcut").checked) {
-      var input = encodeURIComponent(c.user + "|" + (c.hs || ""));
-      return "shortcuts://run-shortcut?name=" + encodeURIComponent("去发私信") + "&input=" + input;
-    }
-    return "https://www.tiktok.com/@" + encodeURIComponent(c.user);
-  }
-
-  function refreshCounts() {
-    var d = 0;
-    customers.forEach(function (c) { if (done[c.user]) d++; });
-    $("cntDone").textContent = d;
-    $("bar").style.width = (customers.length ? (d / customers.length * 100) : 0) + "%";
-  }
-
-  function generate() {
-    customers = parseList();
-    localStorage.setItem(LS_LIST, $("listInput").value);
-    localStorage.setItem(LS_HS, $("hsInput").value);
-    localStorage.setItem(LS_SC, $("useShortcut").checked ? "1" : "0");
-    render();
-    if (customers.length) { $("editBox").open = false; }
-  }
-
-  // 初始化：恢复上次
-  loadDone();
-  $("listInput").value = localStorage.getItem(LS_LIST) || "";
-  $("hsInput").value = localStorage.getItem(LS_HS) || "";
+  // ── 管理模式 ──
   $("useShortcut").checked = localStorage.getItem(LS_SC) === "1";
-  customers = parseList();
-  if (!customers.length) { $("editBox").open = true; }
-  render();
+  $("useShortcut").onchange = function () { localStorage.setItem(LS_SC, this.checked ? "1" : "0"); render(); };
 
-  $("genBtn").onclick = generate;
-  $("resetDone").onclick = function () { done = {}; saveDone(); render(); showToast("已清零"); };
-  $("clearList").onclick = function () {
-    if (!confirm("确定清空当前名单（删掉所有客户）吗？\n\n注意：这只清手机本地。若电脑中转点还有名单，下次打开会自动同步回来——要彻底删请在电脑推送台点「清空手机名单」。")) return;
-    $("listInput").value = ""; localStorage.setItem(LS_LIST, "");
-    customers = []; render(); showToast("名单已清空");
-  };
-
-  // 📥 从电脑拉取名单：用同步码读 GitHub Gist（电脑端推送过去的）
-  $("syncCode").value = localStorage.getItem(LS_CODE) || "";
-  $("syncCode").onchange = function () { localStorage.setItem(LS_CODE, $("syncCode").value.trim()); };
-
-  function doPull(silent) {
-    var code = ($("syncCode").value || "").trim();
-    if (!code) { if (!silent) showToast("先填电脑给的同步码"); return; }
-    localStorage.setItem(LS_CODE, code);
-    $("pullBtn").disabled = true; if (!silent) showToast("拉取中…");
-    fetch("https://api.github.com/gists/" + encodeURIComponent(code) + "?t=" + Date.now())
-      .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status + "（同步码对吗？）"); return r.json(); })
-      .then(function (j) {
-        var files = j.files || {};
-        var f = files["list.txt"] || files[Object.keys(files)[0]];
-        if (!f) throw new Error("中转点是空的");
-        if (f.truncated && f.raw_url) { return fetch(f.raw_url).then(function (r) { return r.text(); }); }
-        return f.content;
-      })
-      .then(function (text) {
-        var t = String(text || "");
-        if (t.trim() === ($("listInput").value || "").trim()) { if (!silent) showToast("已是最新，没有变化"); return; }
-        $("listInput").value = t;
-        generate();
-        showToast("已" + (silent ? "自动" : "") + "同步电脑名单，共 " + customers.length + " 个");
-      })
-      .catch(function (e) { if (!silent) showToast("拉取失败：" + e.message); })
-      .then(function () { $("pullBtn").disabled = false; });
+  function applyAdmin(on) {
+    $("adminBox").style.display = on ? "" : "none";
+    if (on) { $("listInput").value = state.listText; $("poolInput").value = state.poolText; $("adminBox").open = true; }
   }
-  $("pullBtn").onclick = function () { doPull(false); };
-  // 打开 App 就自动同步一次（填过同步码时）——电脑推完，手机一开就是新的
-  if (($("syncCode").value || "").trim()) { doPull(true); }
+  $("adminToggle").checked = localStorage.getItem(LS_ADMIN) === "1";
+  applyAdmin($("adminToggle").checked);
+  $("adminToggle").onchange = function () { localStorage.setItem(LS_ADMIN, this.checked ? "1" : "0"); applyAdmin(this.checked); };
 
-  // 📂 导入文件：读 .txt/.csv，规范化每行为「用户名 | 话术」，追加到名单后生成
+  $("saveBtn").onclick = function () {
+    listRef.set($("listInput").value || "");
+    poolRef.set($("poolInput").value || "");
+    showToast("已保存并同步到所有手机");
+  };
+  $("resetSent").onclick = function () {
+    if (!confirm("把所有手机的「已发」进度清零？（名单不动）")) return;
+    sentRef.remove(); showToast("已发进度已清零");
+  };
+  $("clearAll").onclick = function () {
+    if (!confirm("清空全部名单 + 进度（所有手机一起空）？此操作不可撤销。")) return;
+    listRef.set(""); sentRef.remove(); $("listInput").value = ""; showToast("已清空全部");
+  };
   $("fileInput").onchange = function (e) {
-    var f = e.target.files && e.target.files[0];
-    if (!f) return;
+    var f = e.target.files && e.target.files[0]; if (!f) return;
     var reader = new FileReader();
     reader.onload = function () {
       var text = String(reader.result || "").replace(/^﻿/, "");
       var added = text.split(/\r?\n/).map(function (ln) {
-        ln = ln.trim();
-        if (!ln) return "";
-        if (ln.indexOf("|") >= 0 || ln.indexOf("｜") >= 0) return ln;     // 已是竖线格式
-        var m = ln.match(/^([^\t,，]+)[\t,，](.+)$/);                      // 逗号/制表符 → 竖线
-        return m ? (m[1].trim() + " | " + m[2].trim()) : ln;             // 纯用户名也保留
+        ln = ln.trim(); if (!ln) return "";
+        if (ln.indexOf("|") >= 0 || ln.indexOf("｜") >= 0) return ln;
+        var m = ln.match(/^([^\t,，]+)[\t,，](.+)$/); return m ? (m[1].trim() + " | " + m[2].trim()) : ln;
       }).filter(Boolean);
       if (!added.length) { showToast("文件是空的"); return; }
       var cur = ($("listInput").value || "").trim();
-      $("listInput").value = (cur ? cur + "\n" : "") + added.join("\n");  // 追加
-      generate();
-      showToast("已导入 " + added.length + " 条，共 " + customers.length + " 个");
+      $("listInput").value = (cur ? cur + "\n" : "") + added.join("\n");
+      showToast("已导入 " + added.length + " 条，记得点「保存并同步」");
     };
-    reader.readAsText(f, "utf-8");
-    e.target.value = "";   // 允许同一个文件再次选
+    reader.readAsText(f, "utf-8"); e.target.value = "";
   };
 })();
 </script>
