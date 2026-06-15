@@ -89,8 +89,11 @@
 
       <div class="row-btns">
         <button class="btn" id="genBtn">保存并生成名单</button>
+        <label class="btn ghost" for="fileInput" style="cursor:pointer">📂 导入文件</label>
+        <input type="file" id="fileInput" accept=".txt,.csv,text/plain,text/csv" style="display:none">
         <button class="btn ghost" id="resetDone">把"已发"全部清零</button>
       </div>
+      <p class="hint" style="margin:8px 2px 0">导入支持 .txt / .csv：每行 <b>用户名 | 话术</b>（或 <b>用户名,话术</b> / 纯用户名）。导入会<b>追加</b>到现有名单后面。</p>
     </div>
   </details>
 
@@ -226,6 +229,30 @@ if ("serviceWorker" in navigator) {
 
   $("genBtn").onclick = generate;
   $("resetDone").onclick = function () { done = {}; saveDone(); render(); showToast("已清零"); };
+
+  // 📂 导入文件：读 .txt/.csv，规范化每行为「用户名 | 话术」，追加到名单后生成
+  $("fileInput").onchange = function (e) {
+    var f = e.target.files && e.target.files[0];
+    if (!f) return;
+    var reader = new FileReader();
+    reader.onload = function () {
+      var text = String(reader.result || "").replace(/^﻿/, "");
+      var added = text.split(/\r?\n/).map(function (ln) {
+        ln = ln.trim();
+        if (!ln) return "";
+        if (ln.indexOf("|") >= 0 || ln.indexOf("｜") >= 0) return ln;     // 已是竖线格式
+        var m = ln.match(/^([^\t,，]+)[\t,，](.+)$/);                      // 逗号/制表符 → 竖线
+        return m ? (m[1].trim() + " | " + m[2].trim()) : ln;             // 纯用户名也保留
+      }).filter(Boolean);
+      if (!added.length) { showToast("文件是空的"); return; }
+      var cur = ($("listInput").value || "").trim();
+      $("listInput").value = (cur ? cur + "\n" : "") + added.join("\n");  // 追加
+      generate();
+      showToast("已导入 " + added.length + " 条，共 " + customers.length + " 个");
+    };
+    reader.readAsText(f, "utf-8");
+    e.target.value = "";   // 允许同一个文件再次选
+  };
 })();
 </script>
 </body>
