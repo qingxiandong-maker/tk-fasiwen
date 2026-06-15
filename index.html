@@ -290,11 +290,12 @@ if ("serviceWorker" in navigator) {
   // 📥 从电脑拉取名单：用同步码读 GitHub Gist（电脑端推送过去的）
   $("syncCode").value = localStorage.getItem(LS_CODE) || "";
   $("syncCode").onchange = function () { localStorage.setItem(LS_CODE, $("syncCode").value.trim()); };
-  $("pullBtn").onclick = function () {
+
+  function doPull(silent) {
     var code = ($("syncCode").value || "").trim();
-    if (!code) { showToast("先填电脑给的同步码"); return; }
+    if (!code) { if (!silent) showToast("先填电脑给的同步码"); return; }
     localStorage.setItem(LS_CODE, code);
-    $("pullBtn").disabled = true; showToast("拉取中…");
+    $("pullBtn").disabled = true; if (!silent) showToast("拉取中…");
     fetch("https://api.github.com/gists/" + encodeURIComponent(code) + "?t=" + Date.now())
       .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status + "（同步码对吗？）"); return r.json(); })
       .then(function (j) {
@@ -305,13 +306,18 @@ if ("serviceWorker" in navigator) {
         return f.content;
       })
       .then(function (text) {
-        $("listInput").value = String(text || "");
+        var t = String(text || "");
+        if (t.trim() === ($("listInput").value || "").trim()) { if (!silent) showToast("已是最新，没有变化"); return; }
+        $("listInput").value = t;
         generate();
-        showToast("已拉取，共 " + customers.length + " 个客户");
+        showToast("已" + (silent ? "自动" : "") + "同步电脑名单，共 " + customers.length + " 个");
       })
-      .catch(function (e) { showToast("拉取失败：" + e.message); })
+      .catch(function (e) { if (!silent) showToast("拉取失败：" + e.message); })
       .then(function () { $("pullBtn").disabled = false; });
-  };
+  }
+  $("pullBtn").onclick = function () { doPull(false); };
+  // 打开 App 就自动同步一次（填过同步码时）——电脑推完，手机一开就是新的
+  if (($("syncCode").value || "").trim()) { doPull(true); }
 
   // 📂 导入文件：读 .txt/.csv，规范化每行为「用户名 | 话术」，追加到名单后生成
   $("fileInput").onchange = function (e) {
