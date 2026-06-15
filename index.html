@@ -87,6 +87,14 @@
         <label for="useShortcut" style="margin:0">用「去发私信」快捷指令跳转（装了快捷指令再勾；不勾就直接跳，话术也照样复制）</label>
       </div>
 
+      <label class="fld">电脑同步码（电脑推送名单后填一次，以后点「拉取」就把电脑上的名单拉下来）</label>
+      <div style="display:flex; gap:8px">
+        <input id="syncCode" placeholder="把电脑给的同步码粘进来" autocomplete="off" spellcheck="false"
+               style="flex:1; min-width:0; background:#0c0e12; color:var(--txt); border:1px solid var(--line);
+                      border-radius:10px; padding:10px; font-size:13px; font-family:ui-monospace,Menlo,Consolas,monospace">
+        <button class="btn" id="pullBtn" style="white-space:nowrap">📥 拉取电脑名单</button>
+      </div>
+
       <div class="row-btns">
         <button class="btn" id="genBtn">保存并生成名单</button>
         <label class="btn ghost" for="fileInput" style="cursor:pointer">📂 导入文件</label>
@@ -114,7 +122,7 @@ if ("serviceWorker" in navigator) {
 
 <script>
 (function () {
-  var LS_LIST = "tk_list_raw", LS_HS = "tk_hs_raw", LS_DONE = "tk_done", LS_SC = "tk_use_sc";
+  var LS_LIST = "tk_list_raw", LS_HS = "tk_hs_raw", LS_DONE = "tk_done", LS_SC = "tk_use_sc", LS_CODE = "tk_sync_code";
   var $ = function (id) { return document.getElementById(id); };
   var customers = [];          // {user, hs}
   var done = {};               // user -> true
@@ -129,6 +137,7 @@ if ("serviceWorker" in navigator) {
     raw.split(/\r?\n/).forEach(function (line) {
       line = line.trim();
       if (!line) return;
+      if (line.charAt(0) === "#") return;             // 跳过注释行
       var parts = line.split(/\s*[|｜]\s*/);          // 按 | 或 ｜ 拆
       var user = (parts[0] || "").replace(/^@+/, "").trim();
       if (!user) return;
@@ -229,6 +238,32 @@ if ("serviceWorker" in navigator) {
 
   $("genBtn").onclick = generate;
   $("resetDone").onclick = function () { done = {}; saveDone(); render(); showToast("已清零"); };
+
+  // 📥 从电脑拉取名单：用同步码读 GitHub Gist（电脑端推送过去的）
+  $("syncCode").value = localStorage.getItem(LS_CODE) || "";
+  $("syncCode").onchange = function () { localStorage.setItem(LS_CODE, $("syncCode").value.trim()); };
+  $("pullBtn").onclick = function () {
+    var code = ($("syncCode").value || "").trim();
+    if (!code) { showToast("先填电脑给的同步码"); return; }
+    localStorage.setItem(LS_CODE, code);
+    $("pullBtn").disabled = true; showToast("拉取中…");
+    fetch("https://api.github.com/gists/" + encodeURIComponent(code) + "?t=" + Date.now())
+      .then(function (r) { if (!r.ok) throw new Error("HTTP " + r.status + "（同步码对吗？）"); return r.json(); })
+      .then(function (j) {
+        var files = j.files || {};
+        var f = files["list.txt"] || files[Object.keys(files)[0]];
+        if (!f) throw new Error("中转点是空的");
+        if (f.truncated && f.raw_url) { return fetch(f.raw_url).then(function (r) { return r.text(); }); }
+        return f.content;
+      })
+      .then(function (text) {
+        $("listInput").value = String(text || "");
+        generate();
+        showToast("已拉取，共 " + customers.length + " 个客户");
+      })
+      .catch(function (e) { showToast("拉取失败：" + e.message); })
+      .then(function () { $("pullBtn").disabled = false; });
+  };
 
   // 📂 导入文件：读 .txt/.csv，规范化每行为「用户名 | 话术」，追加到名单后生成
   $("fileInput").onchange = function (e) {
