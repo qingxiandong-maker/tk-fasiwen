@@ -112,6 +112,7 @@
         <label class="btn ghost" for="fileInput" style="cursor:pointer">📂 导入文件</label>
         <input type="file" id="fileInput" accept=".txt,.csv,text/plain,text/csv" style="display:none">
         <button class="btn ghost" id="resetDone">把"已发"全部清零</button>
+        <button class="btn ghost" id="clearList" style="border-color:#5a2a2a;color:#ff8a8a">🗑️ 清空名单</button>
       </div>
       <p class="hint" style="margin:8px 2px 0">导入支持 .txt / .csv：每行 <b>用户名 | 话术</b>（或 <b>用户名,话术</b> / 纯用户名）。导入会<b>追加</b>到现有名单后面。</p>
     </div>
@@ -286,6 +287,11 @@ if ("serviceWorker" in navigator) {
 
   $("genBtn").onclick = generate;
   $("resetDone").onclick = function () { done = {}; saveDone(); render(); showToast("已清零"); };
+  $("clearList").onclick = function () {
+    if (!confirm("确定清空当前名单（删掉所有客户）吗？\n\n注意：这只清手机本地。若电脑中转点还有名单，下次打开会自动同步回来——要彻底删请在电脑推送台点「清空手机名单」。")) return;
+    $("listInput").value = ""; localStorage.setItem(LS_LIST, "");
+    customers = []; render(); showToast("名单已清空");
+  };
 
   // 📥 从电脑拉取名单：用同步码读 GitHub Gist（电脑端推送过去的）
   $("syncCode").value = localStorage.getItem(LS_CODE) || "";
