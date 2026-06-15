@@ -60,6 +60,15 @@
   .toast.show { opacity:.92; transform:translateX(-50%) translateY(0); }
   .opt { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--sub); margin-top:12px; }
   .opt input { width:18px; height:18px; }
+
+  /* 导入看板 */
+  .board { display:flex; flex-wrap:wrap; gap:8px; margin:0 2px 14px; }
+  .bchip { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:7px 12px; min-width:62px; }
+  .bchip b { display:block; font-size:20px; line-height:1.15; font-variant-numeric:tabular-nums; }
+  .bchip span { font-size:11px; color:var(--sub); }
+  .bchip.ok b { color:var(--accent); } .bchip.bad b { color:#ff5c5c; } .bchip.warn b { color:#ffb74d; }
+  .tag { font-size:11px; padding:1px 6px; border-radius:7px; margin-left:6px; font-weight:500; white-space:nowrap; }
+  .tag.bad { background:#3a1414; color:#ff8a8a; } .tag.warn { background:#3a2c12; color:#ffcd80; }
 </style>
 </head>
 <body>
@@ -72,6 +81,9 @@
     <span>已发 <b id="cntDone">0</b> / 共 <b id="cntAll">0</b></span>
     <span class="progress"><i id="bar"></i></span>
   </div>
+
+  <!-- 导入看板：导入/拉取/生成后显示这批名单的构成 -->
+  <div class="board" id="board" style="display:none"></div>
 
   <details id="editBox">
     <summary>✏️ 编辑名单 / 设置话术</summary>
@@ -148,12 +160,45 @@ if ("serviceWorker" in navigator) {
     return out;
   }
 
+  function renderBoard(stats) {
+    var b = $("board");
+    if (!customers.length) { b.style.display = "none"; b.innerHTML = ""; return; }
+    function chip(n, label, cls) {
+      return '<div class="bchip ' + (cls || "") + '"><b>' + n + '</b><span>' + label + '</span></div>';
+    }
+    b.style.display = "";
+    b.innerHTML =
+      chip(customers.length, "客户总数", "ok") +
+      chip(stats.withHs, "有专属话术", "") +
+      chip(stats.withoutHs, "走通用话术", "") +
+      chip(stats.numeric, "⚠️数字ID·跳不了", stats.numeric ? "bad" : "") +
+      chip(stats.dups, "⚠️重复用户名", stats.dups ? "warn" : "");
+  }
+
   function render() {
     var ul = $("list"); ul.innerHTML = "";
     $("cntAll").textContent = customers.length;
+
+    // 第一遍：算看板统计 + 找重复用户名
+    var withHs = 0, numericN = 0, seen = {}, dupSet = {};
+    customers.forEach(function (c) {
+      if (c.hs) withHs++;
+      if (/^\d+$/.test(c.user)) numericN++;
+      var k = c.user.toLowerCase();
+      if (seen[k]) dupSet[k] = 1;
+      seen[k] = 1;
+    });
+    renderBoard({
+      withHs: withHs, withoutHs: customers.length - withHs,
+      numeric: numericN, dups: Object.keys(dupSet).length
+    });
+
+    // 第二遍：画列表，问题行打标
     var d = 0;
     customers.forEach(function (c) {
       if (done[c.user]) d++;
+      var isNum = /^\d+$/.test(c.user);
+      var isDup = !!dupSet[c.user.toLowerCase()] && !isNum;
       var li = document.createElement("li");
       if (done[c.user]) li.className = "done";
 
@@ -161,7 +206,10 @@ if ("serviceWorker" in navigator) {
       main.className = "main";
       main.href = buildUrl(c);                        // 真链接：iOS 上点击直接跳，最稳
       main.setAttribute("rel", "noopener");
-      var u = document.createElement("div"); u.className = "uname"; u.textContent = "@" + c.user;
+      var u = document.createElement("div"); u.className = "uname";
+      u.appendChild(document.createTextNode("@" + c.user));
+      if (isNum) { var tn = document.createElement("span"); tn.className = "tag bad"; tn.textContent = "数字ID跳不了"; u.appendChild(tn); }
+      else if (isDup) { var td = document.createElement("span"); td.className = "tag warn"; td.textContent = "重复"; u.appendChild(td); }
       var h = document.createElement("div"); h.className = "hs"; h.textContent = c.hs || "（无话术，跳转后自己打字）";
       main.appendChild(u); main.appendChild(h);
       main.onclick = function () {
