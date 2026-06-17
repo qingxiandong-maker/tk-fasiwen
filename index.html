@@ -6,105 +6,89 @@
 <title>TK发私信</title>
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="TK发私信">
-<meta name="theme-color" content="#0f1115">
+<meta name="theme-color" content="#ffffff">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAALQAAAC0CAIAAACyr5FlAAABcElEQVR42u3aMQ0AMAhFQXxhBf822h2YmO/nKWhuIo2XJa2FJxAcgkNwCA7BITgEh+AQHIJDgkNwCA7BITgEh+AQHIJDcEhwCA7BITgEh+AQHIJDcAgOCQ7BITgEh+AQHIJDcAgOwSE4JDgEh+AQHIJDcAgOwSE4BIcEh+AQHIJDcAgOwSE4BMcxa4MDDjjggAMOOOCAAw444IADDjjggAMOOOCAAw444IADDjjggAMOOOCQ4BAcgkNwCA7BITgEh+BwIXUhhQMOOOCAAw444IADDjgMDjjggAMOOOCAAw444IADDjjggAMOOODw2UdwCA7BITgEh+CQ4BAcgkNwCA7BITgEh+AQHBIcgkNwCA7BITgEh+AQHIJDgkNwCA7BITgEh+AQHIJDcAgOCQ7BITgEh+AQHIJDcAgOwSHBITgEh+AQHIJDcAgOwSE4JDgEh+AQHIJDcAgOwSE4BIfgkGYfyyW4qdVxlAoAAAAASUVORK5CYII=">
 <style>
-  :root { --bg:#0f1115; --card:#1a1d24; --line:#2a2e38; --txt:#e8eaed; --sub:#9aa0ab; --accent:#ff3b5c; --done:#2e7d32; --sel:#2563eb; }
-  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
-  html,body { margin:0; padding:0; background:var(--bg); color:var(--txt);
-              font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif; }
-  .wrap { max-width:680px; margin:0 auto;
-          padding:calc(12px + env(safe-area-inset-top)) 12px calc(80px + env(safe-area-inset-bottom)); }
-  .top { display:flex; align-items:center; justify-content:space-between; margin:4px 2px 2px; }
-  h1 { font-size:18px; margin:0; }
-  .conn { font-size:12px; color:var(--sub); display:flex; align-items:center; gap:5px; }
-  .dot { width:8px; height:8px; border-radius:50%; background:#666; }
-  .dot.on { background:#39d353; } .dot.off { background:#ff5c5c; }
-  .hint { font-size:12.5px; color:var(--sub); margin:6px 2px 12px; line-height:1.6; }
+  /* 矩阵系统 shadcn 黑白风（zinc 调色板） */
+  :root{
+    --bg:#ffffff; --fg:#09090b; --muted:#71717a; --line:#e4e4e7; --soft:#f4f4f5;
+    --pri:#18181b; --pri-fg:#ffffff; --red:#ef4444; --red-soft:#fef2f2; --red-line:#fecaca;
+    --green:#22c55e; --r:8px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--fg);
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+    -webkit-font-smoothing:antialiased;}
+  .wrap{max-width:680px;margin:0 auto;
+    padding:calc(16px + env(safe-area-inset-top)) 14px calc(40px + env(safe-area-inset-bottom));}
+  .top{display:flex;align-items:center;justify-content:space-between;}
+  h1{font-size:18px;margin:0;font-weight:700;letter-spacing:-.01em;}
+  .conn{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:6px;}
+  .dot{width:7px;height:7px;border-radius:50%;background:#a1a1aa;}
+  .dot.on{background:var(--green);} .dot.off{background:var(--red);}
+  .hint{font-size:12.5px;color:var(--muted);margin:8px 0 4px;line-height:1.6;}
 
-  .board { display:flex; flex-wrap:wrap; gap:8px; margin:0 2px 14px; }
-  .bchip { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:7px 12px; min-width:60px; }
-  .bchip b { display:block; font-size:21px; line-height:1.15; font-variant-numeric:tabular-nums; }
-  .bchip span { font-size:11px; color:var(--sub); }
-  .bchip.ok b { color:var(--accent); } .bchip.left b{color:#5ad17a;} .bchip.bad b { color:#ff5c5c; } .bchip.warn b { color:#ffb74d; }
+  /* 卡片 = 可点筛选 */
+  .cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:8px;margin:14px 0;}
+  .card{background:var(--bg);border:1px solid var(--line);border-radius:var(--r);padding:10px 12px;cursor:pointer;transition:.12s;}
+  .card:hover{border-color:#c7c7cc;}
+  .card .n{font-size:22px;font-weight:700;line-height:1.1;font-variant-numeric:tabular-nums;}
+  .card .l{font-size:11px;color:var(--muted);margin-top:2px;}
+  .card.active{border-color:var(--pri);box-shadow:0 0 0 1px var(--pri) inset;}
+  .card.red .n{color:var(--red);}
+  .card.red.active{border-color:var(--red);box-shadow:0 0 0 1px var(--red) inset;}
 
-  ul { list-style:none; margin:0; padding:0; }
-  li { background:var(--card); border:1px solid var(--line); border-radius:12px; margin:0 0 10px;
-       display:flex; align-items:stretch; overflow:hidden; }
-  li.done { opacity:.5; }
-  li.done .main { text-decoration:line-through; }
-  .main { flex:1; padding:13px 14px; cursor:pointer; min-width:0; display:block; text-decoration:none; color:inherit; }
-  .uname { font-size:15.5px; font-weight:600; color:var(--accent); word-break:break-all; }
-  li.done .uname { color:var(--done); }
-  .hs { font-size:13px; color:var(--sub); margin-top:4px; line-height:1.5;
-        display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
-  .mark { width:54px; flex:none; border-left:1px solid var(--line); background:transparent;
-          color:var(--sub); font-size:22px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
-  li.done .mark { color:var(--done); }
-  .tag { font-size:11px; padding:1px 6px; border-radius:7px; margin-left:6px; font-weight:500; white-space:nowrap; }
-  .tag.bad { background:#3a1414; color:#ff8a8a; } .tag.warn { background:#3a2c12; color:#ffcd80; }
-  .gtag { font-size:11px; padding:1px 7px; border-radius:8px; margin-right:6px; font-weight:700; }
-  .gtag.f { background:#3a1430; color:#ff9ad1; } .gtag.m { background:#16243a; color:#7db4ff; } .gtag.u { background:#23262f; color:#8b9099; }
-  .filters { display:flex; gap:8px; margin:0 2px 12px; }
-  .fbtn { background:var(--card); border:1px solid var(--line); color:var(--sub); border-radius:18px; padding:6px 15px; font-size:13px; cursor:pointer; }
-  .fbtn.active { background:var(--accent); color:#fff; border-color:var(--accent); }
-  .empty { text-align:center; color:var(--sub); font-size:13.5px; padding:40px 10px; line-height:1.8; }
+  /* 顶部删除栏（选了可删分类才出现） */
+  .ctxbar{display:none;align-items:center;justify-content:space-between;gap:10px;
+    background:var(--soft);border:1px solid var(--line);border-radius:var(--r);padding:9px 12px;margin:0 0 12px;}
+  .ctxbar.show{display:flex;}
+  .ctxbar .lbl{font-size:13px;color:var(--fg);} .ctxbar .lbl b{font-variant-numeric:tabular-nums;}
+  .delbig{background:var(--red);color:#fff;border:none;border-radius:7px;padding:8px 14px;font-size:13.5px;font-weight:600;cursor:pointer;white-space:nowrap;}
+  .delbig:disabled{opacity:.4;cursor:not-allowed;}
 
-  details { background:var(--card); border:1px solid var(--line); border-radius:12px; margin:14px 0 0; }
-  summary { padding:12px 14px; font-size:14px; cursor:pointer; color:var(--txt); user-select:none; }
-  .panel { padding:0 14px 14px; }
-  label.fld { display:block; font-size:12.5px; color:var(--sub); margin:10px 0 5px; }
-  textarea { width:100%; min-height:120px; background:#0c0e12; color:var(--txt); border:1px solid var(--line);
-             border-radius:10px; padding:10px; font-size:14px; line-height:1.6; resize:vertical;
-             font-family:ui-monospace,Menlo,Consolas,monospace; }
-  .btn { display:inline-block; background:var(--accent); color:#fff; border:none; border-radius:10px;
-         padding:11px 16px; font-size:15px; font-weight:600; cursor:pointer; }
-  .btn.ghost { background:transparent; color:var(--sub); border:1px solid var(--line); font-weight:500; }
-  .btn.danger { background:transparent; color:#ff8a8a; border:1px solid #5a2a2a; font-weight:500; }
-  .row-btns { display:flex; gap:10px; margin-top:12px; flex-wrap:wrap; }
-  .adminbar { margin-top:16px; display:flex; align-items:center; gap:8px; font-size:13px; color:var(--sub); }
-  .adminbar input { width:18px; height:18px; }
-  .opt { display:flex; align-items:center; gap:8px; font-size:13px; color:var(--sub); margin-top:12px; }
-  .opt input { width:18px; height:18px; }
+  ul{list-style:none;margin:0;padding:0;}
+  li{background:var(--bg);border:1px solid var(--line);border-radius:var(--r);margin:0 0 8px;display:flex;align-items:stretch;overflow:hidden;}
+  li.done{opacity:.5;} li.done .main{text-decoration:line-through;}
+  .main{flex:1;padding:12px 13px;cursor:pointer;min-width:0;display:block;text-decoration:none;color:inherit;}
+  .uname{font-size:15px;font-weight:600;word-break:break-all;display:flex;align-items:center;flex-wrap:wrap;gap:6px;}
+  .hs{font-size:12.5px;color:var(--muted);margin-top:4px;line-height:1.5;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .gtag{font-size:10.5px;padding:1px 6px;border-radius:5px;font-weight:700;background:var(--soft);color:var(--muted);border:1px solid var(--line);}
+  .tag{font-size:10.5px;padding:1px 6px;border-radius:5px;font-weight:600;}
+  .tag.bad{background:var(--red-soft);color:#dc2626;border:1px solid var(--red-line);}
+  .tag.warn{background:#fffbeb;color:#b45309;border:1px solid #fde68a;}
+  .mark{width:46px;flex:none;border-left:1px solid var(--line);background:transparent;color:#c7c7cc;
+    font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  li.done .mark{color:var(--pri);}
+  .rowdel{width:44px;flex:none;border-left:1px solid var(--line);background:transparent;color:#d4d4d8;
+    font-size:16px;cursor:pointer;display:none;align-items:center;justify-content:center;}
+  body.admin .rowdel{display:flex;}
+  .rowdel:hover{background:var(--red-soft);color:var(--red);}
+  .empty{text-align:center;color:var(--muted);font-size:13px;padding:30px 10px;line-height:1.8;}
 
-  /* ── 选择/批量删除模式（第88会话，只在电脑管理模式出现）── */
-  .selrow { display:flex; justify-content:flex-end; margin:0 2px 12px; }
-  .selbtn { background:var(--card); border:1px solid var(--line); color:var(--txt);
-            border-radius:18px; padding:6px 15px; font-size:13px; cursor:pointer; }
-  .selbtn.on { background:#22304d; border-color:var(--sel); color:#cfe0ff; }
-  .ck { width:46px; flex:none; display:none; align-items:center; justify-content:center;
-        border-right:1px solid var(--line); font-size:20px; color:var(--sub); cursor:pointer; }
-  body.selmode li .ck { display:flex; }
-  li.sel { border-color:var(--sel); background:#16203a; }
-  li.sel .ck { color:#7db4ff; }
-  body.selmode li .mark { display:none; }
-  .quickbar { display:none; flex-wrap:wrap; gap:7px; align-items:center; margin:0 2px 12px;
-              background:var(--card); border:1px solid var(--line); border-radius:12px; padding:9px 11px; }
-  body.selmode .quickbar { display:flex; }
-  .quickbar .ql { font-size:12px; color:var(--sub); margin-right:2px; }
-  .qbtn { background:#0c0e12; border:1px solid var(--line); color:var(--txt); border-radius:14px;
-          padding:5px 12px; font-size:12.5px; cursor:pointer; }
-  .qbtn:active { background:#22304d; }
-  .actionbar { position:fixed; left:0; right:0; bottom:0; display:none; z-index:8;
-               background:rgba(15,17,21,.96); border-top:1px solid var(--line);
-               padding:12px calc(12px + env(safe-area-inset-right)) calc(12px + env(safe-area-inset-bottom)) calc(12px + env(safe-area-inset-left));
-               backdrop-filter:blur(6px); }
-  body.selmode .actionbar { display:flex; align-items:center; justify-content:space-between; gap:12px; }
-  body.selmode .wrap { padding-bottom:calc(110px + env(safe-area-inset-bottom)); }
-  .actionbar .cnt { font-size:14px; color:var(--sub); }
-  .actionbar .cnt b { color:var(--txt); font-variant-numeric:tabular-nums; }
-  .del { background:#3a1414; color:#ff8a8a; border:1px solid #5a2a2a; border-radius:10px;
-         padding:11px 18px; font-size:15px; font-weight:600; cursor:pointer; }
-  .del:disabled { opacity:.4; cursor:not-allowed; }
-  body.selmode .toast { bottom:88px; }
+  /* 管理模式 */
+  .adminbar{margin-top:18px;display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);border-top:1px solid var(--line);padding-top:14px;}
+  .adminbar input{width:17px;height:17px;}
+  .panel{display:none;background:var(--soft);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-top:10px;}
+  body.admin .panel{display:block;}
+  label.fld{display:block;font-size:12px;color:var(--muted);margin:8px 0 5px;}
+  textarea{width:100%;min-height:110px;background:var(--bg);color:var(--fg);border:1px solid var(--line);
+    border-radius:7px;padding:10px;font-size:14px;line-height:1.6;resize:vertical;
+    font-family:ui-monospace,Menlo,Consolas,monospace;}
+  .btn{display:inline-block;background:var(--pri);color:var(--pri-fg);border:none;border-radius:7px;padding:10px 14px;font-size:14px;font-weight:600;cursor:pointer;}
+  .btn.ghost{background:var(--bg);color:var(--fg);border:1px solid var(--line);font-weight:500;}
+  .btn.danger{background:var(--bg);color:#dc2626;border:1px solid var(--red-line);font-weight:500;}
+  .row-btns{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+  .opt{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin-top:12px;}
+  .opt input{width:17px;height:17px;}
 
-  .toast { position:fixed; left:50%; bottom:24px; transform:translateX(-50%) translateY(20px);
-           background:#000; color:#fff; padding:10px 18px; border-radius:22px; font-size:14px;
-           opacity:0; transition:.2s; pointer-events:none; z-index:9; max-width:88%; text-align:center; }
-  .toast.show { opacity:.92; transform:translateX(-50%) translateY(0); }
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(16px);
+    background:var(--pri);color:#fff;padding:9px 16px;border-radius:20px;font-size:13.5px;
+    opacity:0;transition:.2s;pointer-events:none;z-index:9;max-width:88%;text-align:center;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 </style>
 </head>
 <body>
@@ -113,67 +97,43 @@
     <h1>📨 TK 发私信</h1>
     <span class="conn"><span class="dot" id="dot"></span><span id="connTxt">连接中…</span></span>
   </div>
-  <p class="hint">点客户那行 → 话术自动复制 + 跳到他 TikTok 主页。进去点「发消息」长按粘贴发送。<br>
-     <b style="color:var(--txt)">所有手机实时共用同一份名单和进度</b>，谁发了大家都看到。</p>
+  <p class="hint">点客户那行 → 话术自动复制 + 跳到他 TikTok 主页。点上面卡片可按分类筛选。<br>
+     所有手机实时共用同一份名单和进度，谁发了大家都看到。</p>
 
-  <div class="board" id="board" style="display:none"></div>
+  <!-- 卡片：点了就筛 -->
+  <div class="cards" id="cards" style="display:none"></div>
 
-  <div class="filters" id="filters" style="display:none">
-    <button class="fbtn active" data-g="all">全部</button>
-    <button class="fbtn" data-g="女">♀ 女</button>
-    <button class="fbtn" data-g="男">♂ 男</button>
-  </div>
-
-  <!-- 选择按钮：只在电脑管理模式出现（applyAdmin 控制显隐） -->
-  <div class="selrow" id="selRow" style="display:none">
-    <button class="selbtn" id="selBtn">🗂 选择</button>
-  </div>
-
-  <!-- 快速选择条：进入选择模式才显示（body.selmode 控制） -->
-  <div class="quickbar" id="quickbar">
-    <span class="ql">快速选择:</span>
-    <button class="qbtn" data-q="all">全选</button>
-    <button class="qbtn" data-q="num">选数字ID</button>
-    <button class="qbtn" data-q="女">选♀女</button>
-    <button class="qbtn" data-q="男">选♂男</button>
-    <button class="qbtn" data-q="clear">清除</button>
+  <!-- 顶部删除栏（选了可删分类 + 管理模式 才出现） -->
+  <div class="ctxbar" id="ctxbar">
+    <span class="lbl" id="ctxlbl"></span>
+    <button class="delbig" id="delBig">🗑 删除这 0 个</button>
   </div>
 
   <ul id="list"></ul>
   <div class="empty" id="empty">还没有名单。请在电脑上开「管理模式」导入。</div>
 
-  <!-- 管理模式：导入/清空（在电脑上勾开） -->
+  <!-- 管理模式：删除 / 导入 / 清空（在电脑上勾开） -->
   <div class="adminbar">
     <input type="checkbox" id="adminToggle">
-    <label for="adminToggle" style="margin:0">⚙️ 管理模式（导入 / 清空名单，在电脑上开。手机不用开）</label>
+    <label for="adminToggle" style="margin:0">⚙️ 管理模式（删除 / 导入 / 清空名单，在电脑上开。手机不用开）</label>
   </div>
-
-  <details id="adminBox" style="display:none">
-    <summary>✏️ 编辑 / 导入名单</summary>
-    <div class="panel">
-      <label class="fld">客户名单（一行一个：<b>用户名 | 话术</b> / <b>用户名,话术</b> / 纯用户名）</label>
-      <textarea id="listInput" placeholder="zhang_san | 你好呀，刷到你视频想认识一下😊&#10;li_si&#10;wang_meimei,在吗？交个朋友吧"></textarea>
-      <label class="fld">通用话术（每行一句，给没写话术的客户轮换用）</label>
-      <textarea id="poolInput" style="min-height:70px" placeholder="你好呀，刷到你的视频，想认识一下😊"></textarea>
-      <div class="opt">
-        <input type="checkbox" id="useShortcut">
-        <label for="useShortcut" style="margin:0">用「去发私信」快捷指令跳转（装了再勾）</label>
-      </div>
-      <div class="row-btns">
-        <button class="btn" id="saveBtn">💾 保存并同步到所有手机</button>
-        <label class="btn ghost" for="fileInput" style="cursor:pointer">📂 导入文件</label>
-        <input type="file" id="fileInput" accept=".txt,.csv,text/plain,text/csv" style="display:none">
-        <button class="btn ghost" id="resetSent">把"已发"清零</button>
-        <button class="btn danger" id="clearAll">🗑️ 清空全部</button>
-      </div>
+  <div class="panel">
+    <label class="fld">客户名单（一行一个：<b>用户名 | 话术</b> / <b>用户名,话术</b> / 纯用户名）</label>
+    <textarea id="listInput" placeholder="zhang_san | 你好呀，刷到你视频想认识一下😊&#10;li_si&#10;wang_meimei,在吗？交个朋友吧"></textarea>
+    <label class="fld">通用话术（每行一句，给没写话术的客户轮换用）</label>
+    <textarea id="poolInput" style="min-height:64px" placeholder="你好呀，刷到你的视频，想认识一下😊"></textarea>
+    <div class="opt">
+      <input type="checkbox" id="useShortcut">
+      <label for="useShortcut" style="margin:0">用「去发私信」快捷指令跳转（装了再勾）</label>
     </div>
-  </details>
-</div>
-
-<!-- 吸底删除栏：选择模式才显示 -->
-<div class="actionbar" id="actionbar">
-  <span class="cnt">已选 <b id="selCnt">0</b> 个</span>
-  <button class="del" id="delBtn" disabled>🗑 删除选中 (0)</button>
+    <div class="row-btns">
+      <button class="btn" id="saveBtn">💾 保存并同步到所有手机</button>
+      <label class="btn ghost" for="fileInput" style="cursor:pointer">📂 导入文件</label>
+      <input type="file" id="fileInput" accept=".txt,.csv,text/plain,text/csv" style="display:none">
+      <button class="btn ghost" id="resetSent">把"已发"清零</button>
+      <button class="btn danger" id="clearAll">🗑️ 清空全部</button>
+    </div>
+  </div>
 </div>
 
 <div class="toast" id="toast">已复制</div>
@@ -182,7 +142,6 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
 <script>
-// 注册离线缓存（壳子；数据走 Firebase 实时同步）
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", function () { navigator.serviceWorker.register("sw.js").catch(function () {}); });
 }
@@ -200,7 +159,6 @@ if ("serviceWorker" in navigator) {
   };
   firebase.initializeApp(firebaseConfig);
 
-  // 匿名登录后再连数据库（安全规则要求"已登录"，用户完全无感）
   firebase.auth().signInAnonymously().catch(function (e) {
     var t = document.getElementById("connTxt"); if (t) t.textContent = "登录失败：" + (e.code || e.message);
   });
@@ -215,21 +173,20 @@ if ("serviceWorker" in navigator) {
   var poolRef = db.ref("tk/pool");
   var sentRef = db.ref("tk/sent");
   var genderRef = db.ref("tk/gender");
-  var filterG = "all";
-  var selMode = false;        // 选择模式（第88会话）
-  var selected = {};          // 已勾选的 user 集合（选择模式内有效）
+  var filter = "all";   // all|已发|剩余|女|男|num|dup
 
   var $ = function (id) { return document.getElementById(id); };
   var LS_ADMIN = "tk_admin", LS_SC = "tk_use_sc";
 
   var state = { listText: "", poolText: "", sent: {}, gender: {} };
+  var customers = [], dupSet = {};
+
   function genderOf(u) { return state.gender[skey(u)] || "?"; }
-  var customers = [];
+  function isSent(u) { return !!state.sent[skey(u)]; }
+  function isNum(u) { return /^\d+$/.test(u); }
 
   // 用户名 → Firebase 安全 key（避开 . $ # [ ] / %）
-  function skey(u) {
-    return u.replace(/[.$#\[\]\/%]/g, function (c) { return "%" + c.charCodeAt(0).toString(16); });
-  }
+  function skey(u) { return u.replace(/[.$#\[\]\/%]/g, function (c) { return "%" + c.charCodeAt(0).toString(16); }); }
 
   function parseList() {
     var pool = (state.poolText || "").split(/\r?\n/).map(function (s) { return s.trim(); }).filter(Boolean);
@@ -257,69 +214,116 @@ if ("serviceWorker" in navigator) {
     return "https://www.tiktok.com/@" + encodeURIComponent(c.user);
   }
 
-  function isSent(u) { return !!state.sent[skey(u)]; }
+  function match(c, f) {
+    if (f === "all") return true;
+    if (f === "已发") return isSent(c.user);
+    if (f === "剩余") return !isSent(c.user);
+    if (f === "女") return genderOf(c.user) === "女";
+    if (f === "男") return genderOf(c.user) === "男";
+    if (f === "num") return isNum(c.user);
+    if (f === "dup") return !!dupSet[c.user.toLowerCase()] && !isNum(c.user);
+    return true;
+  }
+
+  // 哪些分类给"批量删除"按钮（全部/已发/剩余 不给，防误删）
+  var DELETABLE = { "女":1, "男":1, "num":1, "dup":1 };
+  var LABEL = { all:"全部", 已发:"已发", 剩余:"剩余", 女:"♀ 女", 男:"♂ 男", num:"数字ID·跳不了", dup:"重复" };
+
+  function isAdmin() { return document.body.classList.contains("admin"); }
+
+  // 删除一批用户：从 /tk/list 移除其行 + 清掉 已发/性别 记录
+  function deleteUsers(users) {
+    if (!users.length) return;
+    var selSet = {}; users.forEach(function (u) { selSet[u.toLowerCase()] = 1; });
+    var kept = (state.listText || "").split(/\r?\n/).filter(function (line) {
+      var t = line.trim();
+      if (!t || t.charAt(0) === "#") return true;
+      var parts;
+      if (t.indexOf("|") >= 0 || t.indexOf("｜") >= 0) parts = t.split(/\s*[|｜]\s*/);
+      else { var m = t.match(/^([^\t,，]+)[\t,，](.+)$/); parts = m ? [m[1], m[2]] : [t]; }
+      var user = (parts[0] || "").replace(/^@+/, "").trim();
+      return !selSet[user.toLowerCase()];
+    });
+    var newText = kept.join("\n");
+    listRef.set(newText);
+    users.forEach(function (u) { sentRef.child(skey(u)).remove(); genderRef.child(skey(u)).remove(); });
+    state.listText = newText;   // 乐观更新：立即重画，Firebase 回推会再确认一次
+    if ($("listInput")) $("listInput").value = newText;
+  }
+
+  function renderCards() {
+    var b = $("cards");
+    if (!customers.length) { b.style.display = "none"; b.innerHTML = ""; return; }
+    var total = customers.length, done = 0, num = 0, fem = 0, male = 0;
+    customers.forEach(function (c) {
+      if (isSent(c.user)) done++;
+      if (isNum(c.user)) num++;
+      var g = genderOf(c.user); if (g === "女") fem++; else if (g === "男") male++;
+    });
+    var dupN = Object.keys(dupSet).length;
+    var defs = [
+      { f:"all", n:total, l:"客户总数", cls:"" },
+      { f:"已发", n:done, l:"已发", cls:"" },
+      { f:"剩余", n:total - done, l:"剩余", cls:"" },
+      { f:"女", n:fem, l:"♀ 女", cls:"" },
+      { f:"男", n:male, l:"♂ 男", cls:"" },
+      { f:"num", n:num, l:"⚠ 数字ID·跳不了", cls:num ? "red" : "" },
+      { f:"dup", n:dupN, l:"⚠ 重复", cls:dupN ? "red" : "" }
+    ];
+    b.style.display = "";
+    b.innerHTML = "";
+    defs.forEach(function (d) {
+      var el = document.createElement("div");
+      el.className = "card " + d.cls + (filter === d.f ? " active" : "");
+      el.innerHTML = '<div class="n">' + d.n + '</div><div class="l">' + d.l + '</div>';
+      el.onclick = function () { filter = (filter === d.f ? "all" : d.f); render(); };
+      b.appendChild(el);
+    });
+  }
+
+  function renderCtx() {
+    var bar = $("ctxbar");
+    if (filter !== "all" && DELETABLE[filter] && isAdmin() && customers.length) {
+      var n = customers.filter(function (c) { return match(c, filter); }).length;
+      bar.classList.add("show");
+      $("ctxlbl").innerHTML = '正在看 <b>' + LABEL[filter] + '</b>：共 <b>' + n + '</b> 个';
+      $("delBig").textContent = "🗑 删除这 " + n + " 个";
+      $("delBig").disabled = n === 0;
+    } else { bar.classList.remove("show"); }
+  }
 
   function render() {
     customers = parseList();
+    // 计算重复集合
+    dupSet = {}; var seen = {};
+    customers.forEach(function (c) { var k = c.user.toLowerCase(); if (seen[k]) dupSet[k] = 1; seen[k] = 1; });
+
+    renderCards();
+    renderCtx();
+
     var ul = $("list"); ul.innerHTML = "";
-
-    var withHs = 0, numericN = 0, seen = {}, dupSet = {}, doneN = 0, femN = 0, maleN = 0;
-    customers.forEach(function (c) {
-      if (c.hs) withHs++;
-      if (/^\d+$/.test(c.user)) numericN++;
-      var k = c.user.toLowerCase(); if (seen[k]) dupSet[k] = 1; seen[k] = 1;
-      if (isSent(c.user)) doneN++;
-      var g = genderOf(c.user); if (g === "女") femN++; else if (g === "男") maleN++;
-    });
-
-    var hasGender = femN + maleN > 0;
-    var b = $("board");
-    if (customers.length) {
-      function chip(n, l, cls) { return '<div class="bchip ' + (cls || "") + '"><b>' + n + '</b><span>' + l + '</span></div>'; }
-      b.style.display = "";
-      b.innerHTML =
-        chip(customers.length, "客户总数", "ok") +
-        chip(doneN, "已发", "") +
-        chip(customers.length - doneN, "剩余", "left") +
-        (hasGender ? chip(femN, "♀ 女", "") + chip(maleN, "♂ 男", "") : "") +
-        chip(numericN, "⚠️数字ID·跳不了", numericN ? "bad" : "") +
-        chip(Object.keys(dupSet).length, "⚠️重复", Object.keys(dupSet).length ? "warn" : "");
-    } else { b.style.display = "none"; b.innerHTML = ""; }
-    $("filters").style.display = (customers.length && hasGender) ? "" : "none";
-
-    customers.forEach(function (c) {
-      var g = genderOf(c.user);
-      if (filterG !== "all" && g !== filterG) return;   // 筛选：只画选中性别
+    var shown = customers.filter(function (c) { return match(c, filter); });
+    shown.forEach(function (c) {
       var sent = isSent(c.user);
-      var isNum = /^\d+$/.test(c.user);
-      var isDup = !!dupSet[c.user.toLowerCase()] && !isNum;
+      var g = genderOf(c.user);
+      var num = isNum(c.user);
+      var dup = !!dupSet[c.user.toLowerCase()] && !num;
+
       var li = document.createElement("li");
       if (sent) li.className = "done";
-      if (selMode && selected[c.user]) li.classList.add("sel");
-
-      // 勾选框（仅选择模式 CSS 显示）：点框 = 勾/取消
-      var ck = document.createElement("div");
-      ck.className = "ck"; ck.textContent = selected[c.user] ? "☑" : "☐";
-      ck.onclick = function (e) { e.stopPropagation(); toggleSel(c.user); };
 
       var main = document.createElement("a");
       main.className = "main"; main.href = buildUrl(c); main.setAttribute("rel", "noopener");
       var u = document.createElement("div"); u.className = "uname";
-      if (g === "女" || g === "男") {
-        var gt = document.createElement("span");
-        gt.className = "gtag " + (g === "女" ? "f" : "m");
-        gt.textContent = (g === "女" ? "♀" : "♂");
-        u.appendChild(gt);
-      }
+      if (g === "女" || g === "男") { var gt = document.createElement("span"); gt.className = "gtag"; gt.textContent = (g === "女" ? "♀" : "♂"); u.appendChild(gt); }
       u.appendChild(document.createTextNode("@" + c.user));
-      if (isNum) { var tn = document.createElement("span"); tn.className = "tag bad"; tn.textContent = "数字ID跳不了"; u.appendChild(tn); }
-      else if (isDup) { var tdp = document.createElement("span"); tdp.className = "tag warn"; tdp.textContent = "重复"; u.appendChild(tdp); }
+      if (num) { var tn = document.createElement("span"); tn.className = "tag bad"; tn.textContent = "数字ID跳不了"; u.appendChild(tn); }
+      else if (dup) { var td = document.createElement("span"); td.className = "tag warn"; td.textContent = "重复"; u.appendChild(td); }
       var h = document.createElement("div"); h.className = "hs"; h.textContent = c.hs || "（无话术，跳转后自己打字）";
       main.appendChild(u); main.appendChild(h);
-      main.onclick = function (e) {
-        if (selMode) { e.preventDefault(); toggleSel(c.user); return; }  // 选择模式：整行点=勾选，不跳转
+      main.onclick = function () {
         copyText(c.hs);
-        sentRef.child(skey(c.user)).set(true);   // 共享：标记已发，所有手机同步
+        sentRef.child(skey(c.user)).set(true);   // 共享：标记已发
         // 不拦默认 → 原生跳转
       };
 
@@ -327,10 +331,18 @@ if ("serviceWorker" in navigator) {
       mk.className = "mark"; mk.textContent = sent ? "✓" : "○"; mk.title = "标记已发/未发";
       mk.onclick = function (e) {
         e.stopPropagation();
-        if (sent) sentRef.child(skey(c.user)).remove();
-        else sentRef.child(skey(c.user)).set(true);
+        if (sent) sentRef.child(skey(c.user)).remove(); else sentRef.child(skey(c.user)).set(true);
       };
-      li.appendChild(ck); li.appendChild(main); li.appendChild(mk);
+
+      var rd = document.createElement("div");
+      rd.className = "rowdel"; rd.textContent = "🗑"; rd.title = "删除这一个";
+      rd.onclick = function (e) {
+        e.stopPropagation();
+        if (!confirm("从名单删除 @" + c.user + "？\n会同时清掉它的已发/性别记录，所有手机一起删。")) return;
+        deleteUsers([c.user]); showToast("已删除 @" + c.user); render();
+      };
+
+      li.appendChild(main); li.appendChild(mk); li.appendChild(rd);
       ul.appendChild(li);
     });
     $("empty").style.display = customers.length ? "none" : "block";
@@ -347,9 +359,17 @@ if ("serviceWorker" in navigator) {
   }
   function showToast(m) { var t = $("toast"); t.textContent = m; t.classList.add("show"); setTimeout(function(){ t.classList.remove("show"); }, 1300); }
 
+  // ── 顶部批量删除 ──
+  $("delBig").onclick = function () {
+    var del = customers.filter(function (c) { return match(c, filter); }).map(function (c) { return c.user; });
+    if (!del.length) return;
+    if (!confirm("确定删除「" + LABEL[filter] + "」这 " + del.length + " 个客户？\n会同时清掉他们的已发/性别记录，所有手机一起删，不可撤销。")) return;
+    deleteUsers(del); filter = "all"; showToast("已删除 " + del.length + " 个"); render();
+  };
+
   // ── 实时监听（所有手机共享）──
-  listRef.on("value", function (s) { state.listText = s.val() || ""; if ($("adminBox").style.display !== "none") $("listInput").value = state.listText; render(); });
-  poolRef.on("value", function (s) { state.poolText = s.val() || ""; if ($("adminBox").style.display !== "none") $("poolInput").value = state.poolText; render(); });
+  listRef.on("value", function (s) { state.listText = s.val() || ""; if (isAdmin()) $("listInput").value = state.listText; render(); });
+  poolRef.on("value", function (s) { state.poolText = s.val() || ""; if (isAdmin()) $("poolInput").value = state.poolText; render(); });
   sentRef.on("value", function (s) { state.sent = s.val() || {}; render(); });
   genderRef.on("value", function (s) { state.gender = s.val() || {}; render(); });
   db.ref(".info/connected").on("value", function (s) {
@@ -358,90 +378,15 @@ if ("serviceWorker" in navigator) {
     $("connTxt").textContent = on ? "实时同步中" : "离线（连接中…）";
   });
 
-  // ── 管理模式 ──
+  // ── 快捷指令开关 ──
   $("useShortcut").checked = localStorage.getItem(LS_SC) === "1";
   $("useShortcut").onchange = function () { localStorage.setItem(LS_SC, this.checked ? "1" : "0"); render(); };
 
-  // 性别筛选按钮
-  Array.prototype.forEach.call(document.querySelectorAll(".fbtn"), function (btn) {
-    btn.onclick = function () {
-      filterG = btn.getAttribute("data-g");
-      Array.prototype.forEach.call(document.querySelectorAll(".fbtn"), function (x) { x.classList.toggle("active", x === btn); });
-      render();
-    };
-  });
-
-  // ── 选择 / 批量删除（第88会话，只在电脑管理模式可用）──
-  function toggleSel(user) {
-    if (selected[user]) delete selected[user]; else selected[user] = true;
-    render(); updateActionBar();
-  }
-  function updateActionBar() {
-    var n = Object.keys(selected).length;
-    $("selCnt").textContent = n;
-    $("delBtn").textContent = "🗑 删除选中 (" + n + ")";
-    $("delBtn").disabled = n === 0;
-  }
-  function exitSelMode() {
-    selMode = false; selected = {};
-    document.body.classList.remove("selmode");
-    $("selBtn").classList.remove("on"); $("selBtn").textContent = "🗂 选择";
-    render(); updateActionBar();
-  }
-  $("selBtn").onclick = function () {
-    selMode = !selMode;
-    document.body.classList.toggle("selmode", selMode);
-    $("selBtn").classList.toggle("on", selMode);
-    $("selBtn").textContent = selMode ? "✕ 退出选择" : "🗂 选择";
-    if (!selMode) selected = {};
-    render(); updateActionBar();
-  };
-  // 快速选择（对整份名单生效，不只当前筛选）
-  Array.prototype.forEach.call(document.querySelectorAll(".qbtn"), function (btn) {
-    btn.onclick = function () {
-      var q = btn.getAttribute("data-q");
-      if (q === "clear") { selected = {}; }
-      else customers.forEach(function (c) {
-        var g = genderOf(c.user);
-        if (q === "all") selected[c.user] = true;
-        else if (q === "num" && /^\d+$/.test(c.user)) selected[c.user] = true;
-        else if (q === "女" && g === "女") selected[c.user] = true;
-        else if (q === "男" && g === "男") selected[c.user] = true;
-      });
-      render(); updateActionBar();
-    };
-  });
-  // 删除选中：从 /tk/list 移除对应行 + 清掉他们的 已发/性别 记录
-  $("delBtn").onclick = function () {
-    var users = Object.keys(selected);
-    if (!users.length) return;
-    if (!confirm("确定从名单删除选中的 " + users.length + " 个客户？\n会同时清掉他们的「已发 / 性别」记录，所有手机一起删，不可撤销。")) return;
-    var selSet = {}; users.forEach(function (u) { selSet[u.toLowerCase()] = 1; });
-    // 按行过滤 listText：解析出每行的 user，被选中的整行删掉（空行/注释保留）
-    var kept = (state.listText || "").split(/\r?\n/).filter(function (line) {
-      var t = line.trim();
-      if (!t || t.charAt(0) === "#") return true;
-      var parts;
-      if (t.indexOf("|") >= 0 || t.indexOf("｜") >= 0) parts = t.split(/\s*[|｜]\s*/);
-      else { var m = t.match(/^([^\t,，]+)[\t,，](.+)$/); parts = m ? [m[1], m[2]] : [t]; }
-      var user = (parts[0] || "").replace(/^@+/, "").trim();
-      return !selSet[user.toLowerCase()];
-    });
-    var newText = kept.join("\n");
-    listRef.set(newText);
-    users.forEach(function (u) { sentRef.child(skey(u)).remove(); genderRef.child(skey(u)).remove(); });
-    var n = users.length;
-    selected = {};
-    state.listText = newText;   // 乐观更新：立即重画，Firebase 回推会再确认一次
-    render(); updateActionBar();
-    showToast("已删除 " + n + " 个");
-  };
-
+  // ── 管理模式 ──
   function applyAdmin(on) {
-    $("adminBox").style.display = on ? "" : "none";
-    $("selRow").style.display = on ? "" : "none";   // 「选择」按钮只在管理模式出现
-    if (on) { $("listInput").value = state.listText; $("poolInput").value = state.poolText; $("adminBox").open = true; }
-    else if (selMode) { exitSelMode(); }            // 关管理模式 → 退出选择模式
+    document.body.classList.toggle("admin", on);
+    if (on) { $("listInput").value = state.listText; $("poolInput").value = state.poolText; }
+    render();
   }
   $("adminToggle").checked = localStorage.getItem(LS_ADMIN) === "1";
   applyAdmin($("adminToggle").checked);
